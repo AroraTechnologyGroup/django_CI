@@ -1,13 +1,13 @@
-from arora.settings import BASE_DIR
 import cgitb
 import subprocess
 from subprocess import PIPE
 from django.core.mail import send_mail
 from django.core import mail
+import os
 cgitb.enable()
 
 
-def pull(path):
+def pull(app_name, path):
     kwargs = dict()
     kwargs['cwd'] = path
     kwargs['stderr'] = PIPE
@@ -17,6 +17,7 @@ def pull(path):
     proc = subprocess.Popen(git_cmd, **kwargs)
     (std_out, std_err) = proc.communicate()
 
+    BASE_DIR = os.path.join(path, app_name)
     kwargs = dict()
     kwargs['cwd'] = BASE_DIR
     kwargs['stderr'] = PIPE
@@ -29,15 +30,14 @@ def pull(path):
 
     connection = mail.get_connection()
     connection.open()
+    report_string = "std_out: {} \n std_err: {} \n collectstatic: {} \n err: {}".format(std_out, std_err, out, err)
     send_mail(
-        "Deploy ARORA to Staging",
-        "std_out: {} \n std_err: {} \n collectstatic: {}\n err: {}".format(std_out, std_err, out, err),
+        "Deploy {} to Staging".format(app_name),
+        report_string,
         "rhughes@aroraengineers.com",
         ["richardh522@gmail.com"],
         fail_silently=False,
     )
     connection.close()
-    if std_err:
-        return std_err
-    else:
-        return std_out
+
+    return report_string

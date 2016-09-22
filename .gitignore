@@ -1,4 +1,6 @@
 */venv/
 .idea/
 */__pychache__/
-
+*/db.sqlite3
+*/logs/
+*/web.config
