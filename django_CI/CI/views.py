@@ -43,7 +43,7 @@ class AroraStaging(APIView):
             x = deploy.pull(app_name="arora", path=staging_path)
         else:
             x = err
-        resp = Response(x, content_type='application/json')
+        resp = Response(x, headers={'Content-Type': 'application/json', 'Media-Type': 'indent=4'})
         out, err = start_site(iis_site)
         return resp
 
@@ -62,6 +62,6 @@ class RTAAStaging(APIView):
             x = deploy.pull(app_name="rtaa_gis", path=staging_path)
         else:
             x = err
-        resp = Response(x, content_type='application/json')
+        resp = Response(x, headers={'Content-Type': 'application/json', 'Media-Type': 'indent=4'})
         out, err = start_site(iis_site)
         return resp
