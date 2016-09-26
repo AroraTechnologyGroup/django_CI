@@ -33,14 +33,14 @@ def pull(app_name, path):
 
     connection = mail.get_connection()
     connection.open()
-    report_string = "std_out: {} \n std_err: {} \n collectstatic: {} \n err: {}".format(std_out, std_err, out, err)
+    report_obj = {'git-out': std_out, 'git-err': std_err, 'collectstatic-out': out, 'collectstatic-err': err}
     send_mail(
         "Deploy {} to Staging".format(app_name),
-        report_string,
+        repr(report_obj),
         "rhughes@aroraengineers.com",
         ["richardh522@gmail.com"],
         fail_silently=False,
     )
     connection.close()
 
-    return report_string
+    return report_obj
