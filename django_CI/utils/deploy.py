@@ -3,7 +3,7 @@ import subprocess
 from subprocess import PIPE
 from django.core.mail import send_mail
 from django.core import mail
-import os
+import os, sys
 cgitb.enable()
 
 
@@ -18,14 +18,17 @@ def pull(app_name, path):
     (std_out, std_err) = proc.communicate()
 
     BASE_DIR = os.path.join(path, app_name)
+    sys.path.append(BASE_DIR)
+    os.environ['DJANGO_SETTINGS_MODULE'] = '{}.settings'.format(app_name)
+
     kwargs = dict()
-    kwargs['cwd'] = BASE_DIR
     kwargs['stderr'] = PIPE
     kwargs['stdout'] = PIPE
     kwargs['universal_newlines'] = True
-    python_path = r"venv\scripts\python.exe"
-    manage_script = "manage.py"
-    proc = subprocess.Popen("{} {} collectstatic --no-input".format(python_path, manage_script), **kwargs)
+    python_path = os.path.join(BASE_DIR, r"venv\scripts\python.exe")
+    manage_script = os.path.join(BASE_DIR, "manage.py")
+    proc = subprocess.Popen("{} {} collectstatic --no-input --settings={}.settings".format(python_path, manage_script,
+                                                                                             app_name), **kwargs)
     (out, err) = proc.communicate()
 
     connection = mail.get_connection()
