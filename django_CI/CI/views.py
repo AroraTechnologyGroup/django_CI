@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from utils import deploy
 import subprocess
 from subprocess import PIPE
+import os
 
 
 def stop_site(sitename):
@@ -36,15 +37,21 @@ class AroraStaging(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
+        data = {}
         iis_site = 'arora_staging'
         out, err = stop_site(iis_site)
+        data['iis_stop_out'] = out
+        data['iis_stop_err'] = err
         if not err:
             staging_path = r"C:\inetpub\django_staging\arora"
-            x = deploy.pull(app_name="arora", path=staging_path)
-        else:
-            x = err
-        resp = Response(x, headers={'Content-Type': 'application/json', 'Media-Type': 'indent=4'})
+            python_path = os.path.join(staging_path, r"venv\scripts\python.exe")
+            x = deploy.pull(app_name="arora", staging_path=staging_path, python_path=python_path)
+            data.update(x)
+
         out, err = start_site(iis_site)
+        data['iis_start_out'] = out
+        data['iis_start_err'] = err
+        resp = Response(data, headers={'Content-Type': 'application/json', 'Media-Type': 'indent=4'})
         return resp
 
 
@@ -62,7 +69,9 @@ class RTAAStaging(APIView):
 
         if not err:
             staging_path = r"C:\inetpub\django_staging\rtaa_gis"
-            x = deploy.pull(app_name="rtaa_gis", path=staging_path)
+            python_path = r"C:\inetpub\Anaconda3\envs\rtaa_gis\python.exe"
+
+            x = deploy.pull(app_name="rtaa_gis", staging_path=staging_path, python_path=python_path)
             data.update(x)
 
         out, err = start_site(iis_site)

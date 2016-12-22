@@ -7,9 +7,9 @@ import os, sys
 cgitb.enable()
 
 
-def pull(app_name, path):
+def pull(app_name, staging_path, python_path):
     kwargs = dict()
-    kwargs['cwd'] = path
+    kwargs['cwd'] = staging_path
     kwargs['stderr'] = PIPE
     kwargs['stdout'] = PIPE
     kwargs['universal_newlines'] = True
@@ -17,7 +17,7 @@ def pull(app_name, path):
     proc = subprocess.Popen(git_cmd, **kwargs)
     (std_out, std_err) = proc.communicate()
 
-    BASE_DIR = os.path.join(path, app_name)
+    BASE_DIR = os.path.join(staging_path, app_name)
     sys.path.append(BASE_DIR)
     os.environ['DJANGO_SETTINGS_MODULE'] = '{}.settings'.format(app_name)
 
@@ -25,7 +25,7 @@ def pull(app_name, path):
     kwargs['stderr'] = PIPE
     kwargs['stdout'] = PIPE
     kwargs['universal_newlines'] = True
-    python_path = os.path.join(BASE_DIR, r"venv\scripts\python.exe")
+
     manage_script = os.path.join(BASE_DIR, "manage.py")
     proc = subprocess.Popen("{} {} collectstatic --no-input --settings={}.settings".format(python_path, manage_script,
                                                                                              app_name), **kwargs)
