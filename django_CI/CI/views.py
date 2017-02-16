@@ -79,3 +79,29 @@ class RTAAStaging(APIView):
         data['iis_start_err'] = err
         resp = Response(data, headers={'Content-Type': 'application/json', 'Media-Type': 'indent=4'})
         return resp
+
+
+class RTAAProd(APIView):
+    """View that calls git pull on the repo"""
+    renderer_classes = (JSONRenderer,)
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        data = {}
+        iis_site = 'rtaa_gis_prod'
+        out, err = stop_site(iis_site)
+        data['iis_stop_out'] = out
+        data['iis_stop_err'] = err
+
+        if not err:
+            staging_path = r"C:\inetpub\django_prod\rtaa_gis"
+            python_path = r"C:\inetpub\Anaconda3\envs\rtaa_gis_prod\python.exe"
+
+            x = deploy.pull(app_name='rtaa_gis', staging_path=staging_path, python_path=python_path)
+            data.update(x)
+
+        out, err = start_site(iis_site)
+        data['iis_start_out'] = out
+        data['iis_start_err'] = err
+        resp = Response(data, headers={'Content-Type': 'application/json', 'Media-Type': 'indent=4'})
+        return resp
