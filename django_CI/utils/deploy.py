@@ -7,7 +7,7 @@ import os, sys
 cgitb.enable()
 
 
-def pull(app_name, staging_path, python_path):
+def pull_django(app_name, staging_path, python_path):
     kwargs = dict()
     kwargs['cwd'] = staging_path
     kwargs['stderr'] = PIPE
@@ -36,6 +36,31 @@ def pull(app_name, staging_path, python_path):
     report_obj = {'git-out': std_out, 'git-err': std_err, 'collectstatic-out': out, 'collectstatic-err': err}
     send_mail(
         "Deploy {} to Staging".format(app_name),
+        repr(report_obj),
+        "rhughes@aroraengineers.com",
+        ["richardh522@gmail.com"],
+        fail_silently=False,
+    )
+    connection.close()
+
+    return report_obj
+
+
+def pull_git_repo(home_dir):
+    kwargs = dict()
+    name = home_dir.split("\\")[-1]
+    kwargs['cwd'] = home_dir
+    kwargs['stderr'] = PIPE
+    kwargs['stdout'] = PIPE
+    kwargs['universal_newlines'] = True
+    git_cmd = "git pull"
+    proc = subprocess.Popen(git_cmd, **kwargs)
+    (std_out, std_err) = proc.communicate()
+    connection = mail.get_connection()
+    connection.open()
+    report_obj = {'git-out': std_out, 'git-err': std_err}
+    send_mail(
+        "Deploy {} to Staging".format(name),
         repr(report_obj),
         "rhughes@aroraengineers.com",
         ["richardh522@gmail.com"],

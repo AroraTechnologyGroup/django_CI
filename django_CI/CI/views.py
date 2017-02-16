@@ -70,8 +70,10 @@ class RTAAStaging(APIView):
         if not err:
             staging_path = r"C:\inetpub\django_staging\rtaa_gis"
             python_path = r"C:\inetpub\Anaconda3\envs\rtaa_gis\python.exe"
-
-            x = deploy.pull(app_name="rtaa_gis", staging_path=staging_path, python_path=python_path)
+            arcpro_path = r"C:\GitHub\arcpro"
+            x = deploy.pull_django(app_name="rtaa_gis", staging_path=staging_path, python_path=python_path)
+            data.update(x)
+            x = deploy.pull_git_repo(arcpro_path)
             data.update(x)
 
         out, err = start_site(iis_site)
